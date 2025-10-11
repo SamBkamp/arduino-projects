@@ -20,7 +20,7 @@ void setup() {
 
   time_t t = 1760176772;
   setTime(t);
-  
+
 }
 
 void loop() {
