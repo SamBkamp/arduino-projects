@@ -112,23 +112,3 @@ void screen_put_string(char* s){
     screen_put_char(s[i]);
   }
 }
-
-void setup() {  
-  pin_init();
-  function_set();
-  display_init(1, 1, 1);
-  entry_mode(1, 0);
-}
-
-void loop() {
-  clear_display();
-  screen_put_string("fuck my");
-  set_cursor(0, 1);
-  screen_put_string("chud life");
-  delay(2000);
-  
-  clear_display();
-  screen_put_string(":P");
-  delay(2000);
-
-}
