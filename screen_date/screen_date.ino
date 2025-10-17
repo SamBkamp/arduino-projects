@@ -2,13 +2,11 @@
 #include "/home/sam/arduino_projects/screen_date/WifiCredentials.h"
 #include <TimeLib.h>
 #include <WiFi.h>
-
-
 WiFiClient client; //yucky OOP
 int port = 8080;
 
 char buff[64];
-
+char qqq[30];
 char *dow[] = {"Sunday",
 	      "Monday",
 	      "Tuesday",
@@ -18,35 +16,40 @@ char *dow[] = {"Sunday",
 	      "Saturday"
 };
 
-void get_epoch(){
+
+void make_req(char* endpoint){
   IPAddress base(192,168,50,196);
   int res; //connection result
   res = client.connect(base, port);
   clear_display();
   if(res){
     screen_put_string("success!");
-    client.println("HIIII");
+    client.println(endpoint);
     clear_display();
-    delay(20);
+    while(!client.available()){ //check if ready to recieve bytes TODO: create an auto stop
+      delay(20);
+    }
     sprintf(buff,"%d bytes to read", client.available());
     screen_put_string(buff);
-    delay(1000);
-    clear_display();
     int index = 0;
     char construction[13];
-    char *whatever;
     while(client.available()){
       construction[index++] = client.read();
     }
     client.flush();
     client.stop();
     construction[index] = 0;
-    screen_put_string(construction);
-    setTime(strtoul(construction, &whatever, 10));
+    if(strcmp(endpoint, "HIII")==0){
+      setTime(strtoul(construction, NULL, 10));
+    }else{
+      strcpy(qqq, construction);
+    }
+    clear_display();
   }else{
     screen_put_string("failed!");
   }
 }
+
 
 void setup() {
   pin_init();
@@ -54,8 +57,7 @@ void setup() {
   display_init(1, 0, 0);
   entry_mode(1, 0);
 
-  time_t t = 1760176772;
-  setTime(t);
+  setTime(0);
   clear_display();
   screen_put_string("Connecting");
   WiFi.begin(WIFI_SSID, WIFI_PASS);
@@ -64,9 +66,11 @@ void setup() {
   }
   clear_display();
   screen_put_string("Connected!");
-  delay(1000);
-  get_epoch();
-  delay(1000);
+  delay(500);
+  make_req("HIII");
+  delay(500);
+  make_req("qqq");
+  delay(500);
   WiFi.disconnect();
 }
 
@@ -78,5 +82,11 @@ void loop() {
   set_cursor(0, 1);
   sprintf(buff, "%02d.%02d.%02d", day(t), month(t), year(t));
   screen_put_string(buff);
-  delay(30000); //wait half a minute
+
+  delay(10000);
+
+  clear_display();
+  sprintf(buff, "QQQ:  %s", qqq);
+  screen_put_string(buff);
+  delay(10000);
 }
