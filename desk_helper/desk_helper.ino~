@@ -1,5 +1,5 @@
 #include "/home/sam/arduino_projects/screen_io.c"
-#include "/home/sam/arduino_projects/screen_date/WifiCredentials.h"
+#include "/home/sam/arduino_projects/desk_helper/WifiCredentials.h"
 #include <TimeLib.h>
 #include <WiFi.h>
 WiFiClient client; //yucky OOP
@@ -21,7 +21,9 @@ char *dow[] = {"Sunday",
 void make_req(char* endpoint){
   int pre_connection = 0;
   if(WiFi.status() != WL_CONNECTED){
+    digitalWrite(D13, HIGH);
     pre_connection = 1;
+    clear_display();
     screen_put_string("Connecting");
     WiFi.begin(WIFI_SSID, WIFI_PASS);
     while (WiFi.status() != WL_CONNECTED){
@@ -57,12 +59,17 @@ void make_req(char* endpoint){
     delay(2000);
     clear_display();
   }
-  if(pre_connection == 1) //only disconnect wifi if this function connected it
+  if(pre_connection == 1){
+    digitalWrite(D13, LOW);
     WiFi.disconnect();
+  } //only disconnect wifi if this function connected it
+
 }
 
 
 void setup() {
+  pinMode(D13, OUTPUT); //wifi LED
+  digitalWrite(D13, LOW);
   pin_init();
   function_set();
   display_init(1, 0, 0);
@@ -75,6 +82,7 @@ void setup() {
   while (WiFi.status() != WL_CONNECTED){
     delay(700);
   }
+  digitalWrite(D13, HIGH); //set wifi LED
   clear_display();
   screen_put_string("Connected!");
   delay(500);
@@ -84,6 +92,8 @@ void setup() {
   make_req("/gold");
   delay(500);
   WiFi.disconnect();
+  digitalWrite(D13, LOW);
+  //unset wifi LED
 }
 
 void loop() {
